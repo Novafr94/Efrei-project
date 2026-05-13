@@ -1,0 +1,16 @@
+# Dependencies — regenerated with "npm install"
+node_modules/
+
+# Environment variables — contains passwords, never share
+.env
+
+# macOS system files
+.DS_Store
+
+# SQLite database file — local only
+*.db
+*.sqlite
+
+# Logs
+*.log
+npm-debug.log*
