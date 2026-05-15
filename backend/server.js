@@ -1,10 +1,10 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-const path = require('path');
 const fs = require('fs');
 const { DatabaseSync } = require('node:sqlite');
 
@@ -15,8 +15,6 @@ const io = new Server(server, { cors: { origin: '*' } });
 
 app.use(cors());
 app.use(express.json());
-
-// Serve frontend files (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // --- Database setup ---
@@ -25,7 +23,6 @@ const schema = fs.readFileSync(path.join(__dirname, '../database/schema.sql'), '
 db.exec(schema);
 console.log('Database ready.');
 
-// --- Page routes ---
 // --- Page routes ---
 app.get('/', (_req, res) => res.sendFile(path.join(__dirname, '../frontend/pages/index.html')));
 app.get('/radio', (_req, res) => res.sendFile(path.join(__dirname, '../frontend/pages/radio.html')));
@@ -46,7 +43,7 @@ io.on('connection', (socket) => {
 });
 
 // --- Start ---
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3004;
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

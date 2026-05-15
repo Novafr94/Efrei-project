@@ -2,12 +2,286 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Timeless Radio — Music from the 30s to the 70s, streaming continuously.">
+  <meta name="theme-color" content="#f5f5f7">
   <title>Timeless Radio</title>
+  <link rel="stylesheet" href="/css/style.css">
+
+  <style>
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: var(--sp-4);
+      background-color: var(--clr-text);
+      color: #fff;
+      padding: var(--sp-3) var(--sp-5);
+      border-radius: var(--radius-md);
+      font-weight: var(--fw-semibold);
+      z-index: 200;
+      transition: top var(--transition);
+    }
+    .skip-link:focus { top: var(--sp-3); color: #fff; outline: 3px solid var(--clr-focus); outline-offset: 2px; }
+
+    /* Full-height centered layout */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-8);
+      min-height: calc(100vh - var(--nav-height));
+      padding: var(--sp-10) var(--sp-6);
+    }
+
+    .hero-title {
+      font-family: var(--ff-heading);
+      font-size: var(--fs-3xl);
+      font-weight: var(--fw-bold);
+      color: var(--clr-text);
+      letter-spacing: -0.01em;
+      text-align: center;
+    }
+
+    /* Schedule window */
+    .schedule-window {
+      width: 100%;
+      max-width: 340px;
+      background-color: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .schedule-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--clr-border);
+    }
+
+    .schedule-tab {
+      flex: 1;
+      padding: var(--sp-3) var(--sp-4);
+      border: none;
+      background: transparent;
+      font-family: var(--ff-body);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      color: var(--clr-text-muted);
+      cursor: pointer;
+      transition: color var(--transition), background-color var(--transition);
+      letter-spacing: 0.04em;
+    }
+
+    .schedule-tab.active {
+      color: var(--clr-text);
+      background-color: var(--clr-bg);
+    }
+
+    .schedule-tab:focus-visible {
+      outline: 2px solid var(--clr-focus);
+      outline-offset: -2px;
+    }
+
+    .schedule-list {
+      max-height: 220px;
+      overflow-y: auto;
+      padding: var(--sp-2) 0;
+    }
+
+    .schedule-list::-webkit-scrollbar { width: 3px; }
+    .schedule-list::-webkit-scrollbar-track { background: transparent; }
+    .schedule-list::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 99px; }
+
+    .schedule-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-2) var(--sp-5);
+      transition: background-color var(--transition);
+    }
+
+    .schedule-item:hover { background-color: var(--clr-bg); }
+
+    .schedule-item.is-now { background-color: rgba(107, 62, 16, 0.06); }
+
+    .schedule-time {
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      color: var(--clr-text-muted);
+      min-width: 38px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .schedule-item.is-now .schedule-time { color: var(--clr-copper-dark); }
+
+    .schedule-label {
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      color: var(--clr-text);
+      flex: 1;
+    }
+
+    .now-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--clr-copper);
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    .site-footer {
+      padding-block: var(--sp-6);
+      border-top: 1px solid var(--clr-border);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--sp-3);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: var(--sp-5);
+    }
+
+    .footer-links a {
+      font-size: var(--fs-xs);
+      color: var(--clr-text-muted);
+    }
+    .footer-links a:hover { color: var(--clr-text); }
+
+    @media (max-width: 480px) {
+      .hero-title { font-size: var(--fs-2xl); }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Timeless Radio</h1>
-  <p>Server is working.</p>
-  <a href="/radio">Go to Radio</a>
+  <a href="#content" class="skip-link">Skip to content</a>
+
+  <header class="nav" role="banner">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo" aria-label="Timeless Radio — Home">Timeless Radio</a>
+      <nav aria-label="Main navigation">
+        <ul class="nav-links">
+          <li><a href="/" aria-current="page">Home</a></li>
+          <li><a href="/radio">Listen</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="hero" aria-labelledby="hero-title">
+
+      <h1 id="hero-title" class="hero-title">30s to 70s</h1>
+
+      <a href="/radio" class="btn btn-primary btn-lg" aria-label="Start listening to the radio">
+        Start
+      </a>
+
+      <!-- Schedule window -->
+      <aside class="schedule-window" aria-labelledby="schedule-heading">
+        <h2 id="schedule-heading" class="sr-only">Programme</h2>
+        <div class="schedule-tabs" role="tablist" aria-label="Select day">
+          <button class="schedule-tab active" id="tab-today" role="tab"
+                  aria-selected="true" aria-controls="schedule-panel" data-day="today">
+            Today
+          </button>
+          <button class="schedule-tab" id="tab-tomorrow" role="tab"
+                  aria-selected="false" aria-controls="schedule-panel" data-day="tomorrow">
+            Tomorrow
+          </button>
+        </div>
+        <ol class="schedule-list" id="schedule-panel" role="tabpanel" aria-labelledby="tab-today"></ol>
+      </aside>
+
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p class="text-muted text-sm">&copy; 2026 Timeless Radio &middot; EFREI Student Project</p>
+      <nav class="footer-links" aria-label="Footer links">
+        <!-- EXTEND HERE: replace href="#" with real URLs -->
+        <a href="#">About</a>
+        <a href="#">Museum</a>
+        <a href="#">YouTube</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    // Static schedule — replaced by /api/radio/schedule in Bloc 3
+    const schedule = {
+      today: [
+        { time: '06:00', label: 'Morning Jazz' },
+        { time: '09:00', label: 'Swing & Big Band' },
+        { time: '12:00', label: 'Blues Hour' },
+        { time: '15:00', label: 'Bebop Session' },
+        { time: '18:00', label: 'Soul & R\'n\'B' },
+        { time: '21:00', label: 'Evening Standards' },
+        { time: '23:00', label: 'Late Night Bossa' },
+      ],
+      tomorrow: [
+        { time: '06:00', label: 'Morning Jazz' },
+        { time: '09:00', label: 'Boogie & Ragtime' },
+        { time: '12:00', label: 'Gospel & Soul' },
+        { time: '15:00', label: 'Classic Bebop' },
+        { time: '18:00', label: 'Soul & R\'n\'B' },
+        { time: '21:00', label: 'Crooners & Ballads' },
+        { time: '23:00', label: 'Late Night Bossa' },
+      ]
+    };
+
+    function activeIndex(slots) {
+      const now = `${String(new Date().getHours()).padStart(2, '0')}:00`;
+      let idx = 0;
+      slots.forEach((s, i) => { if (s.time <= now) idx = i; });
+      return idx;
+    }
+
+    function renderSchedule(day) {
+      const slots  = schedule[day];
+      const actIdx = day === 'today' ? activeIndex(slots) : -1;
+      const panel  = document.getElementById('schedule-panel');
+
+      panel.innerHTML = slots.map((slot, i) => {
+        const isNow = i === actIdx;
+        return `<li class="schedule-item${isNow ? ' is-now' : ''}">
+          <span class="schedule-time">${slot.time}</span>
+          <span class="schedule-label">${slot.label}</span>
+          ${isNow ? '<span class="now-dot" aria-label="Now playing"></span>' : ''}
+        </li>`;
+      }).join('');
+
+      if (actIdx > -1) {
+        const el = panel.querySelectorAll('.schedule-item')[actIdx];
+        if (el) el.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    document.querySelectorAll('.schedule-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.schedule-tab').forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        panel.setAttribute('aria-labelledby', tab.id);
+        renderSchedule(tab.dataset.day);
+      });
+    });
+
+    const panel = document.getElementById('schedule-panel');
+    renderSchedule('today');
+  </script>
 </body>
 </html>
