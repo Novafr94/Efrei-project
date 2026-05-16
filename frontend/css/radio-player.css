@@ -1,0 +1,303 @@
+/* frontend/css/radio-player.css */
+
+/* ── Two-column layout ────────────────────────────────────── */
+.radio-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - var(--nav-height));
+}
+
+/* ── Left — Player ────────────────────────────────────────── */
+.player-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--sp-16) var(--sp-10);
+  border-right: 1px solid var(--clr-border);
+}
+
+.player-label {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clr-copper);
+  margin-bottom: var(--sp-5);
+}
+
+.player-title {
+  font-family: var(--ff-heading);
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  color: var(--clr-text);
+  line-height: var(--lh-tight);
+  margin-bottom: var(--sp-2);
+}
+
+.player-artist {
+  font-size: var(--fs-md);
+  color: var(--clr-text-muted);
+  margin-bottom: var(--sp-1);
+}
+
+.player-year {
+  font-size: var(--fs-xs);
+  color: var(--clr-text-muted);
+  margin-bottom: var(--sp-10);
+}
+
+/* Progress bar */
+.player-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-8);
+}
+
+.progress-track {
+  flex: 1;
+  height: 3px;
+  background-color: var(--clr-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--clr-text);
+  border-radius: 99px;
+  transition: width 1s linear;
+}
+
+.progress-time {
+  font-size: var(--fs-xs);
+  color: var(--clr-text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+}
+
+/* Controls */
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.btn-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--clr-text);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition), transform var(--transition);
+  flex-shrink: 0;
+}
+
+.btn-play:hover  { background-color: #333336; }
+.btn-play:active { transform: scale(0.95); }
+.btn-play:focus-visible { outline: 3px solid var(--clr-focus); outline-offset: 3px; }
+
+.btn-play svg { fill: #ffffff; width: 22px; height: 22px; }
+
+.player-listeners {
+  font-size: var(--fs-xs);
+  color: var(--clr-text-muted);
+  margin-left: var(--sp-2);
+}
+
+.listener-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: var(--clr-copper);
+  border-radius: 50%;
+  margin-right: var(--sp-1);
+  vertical-align: middle;
+}
+
+/* ── Right — Side panel ───────────────────────────────────── */
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--clr-surface);
+}
+
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--clr-border);
+  flex-shrink: 0;
+}
+
+.panel-tab {
+  flex: 1;
+  padding: var(--sp-4) var(--sp-6);
+  border: none;
+  background: transparent;
+  font-family: var(--ff-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--clr-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.panel-tab.active {
+  color: var(--clr-text);
+  border-bottom-color: var(--clr-text);
+}
+
+.panel-tab:focus-visible { outline: 2px solid var(--clr-focus); outline-offset: -2px; }
+
+/* Anecdotes */
+.anecdotes-panel {
+  flex: 1;
+  padding: var(--sp-8) var(--sp-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.anecdote-title {
+  font-family: var(--ff-heading);
+  font-size: var(--fs-lg);
+  color: var(--clr-copper-dark);
+  margin-bottom: var(--sp-4);
+}
+
+.anecdote-content {
+  font-size: var(--fs-sm);
+  color: var(--clr-text);
+  line-height: var(--lh-loose);
+}
+
+.anecdote-meta {
+  margin-top: var(--sp-5);
+  font-size: var(--fs-xs);
+  color: var(--clr-text-muted);
+  font-style: italic;
+  font-family: var(--ff-heading);
+}
+
+/* Chat */
+.chat-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Pseudo form */
+.pseudo-form {
+  padding: var(--sp-6) var(--sp-8);
+  border-bottom: 1px solid var(--clr-border);
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.pseudo-form.hidden { display: none; }
+
+/* Messages */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-4) var(--sp-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 99px; }
+
+.chat-message { display: flex; flex-direction: column; gap: 2px; }
+
+.chat-message-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+
+.chat-pseudo {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--clr-copper-dark);
+}
+
+.chat-time {
+  font-size: 0.72rem;
+  color: var(--clr-text-muted);
+}
+
+.chat-content {
+  font-size: var(--fs-xs);
+  color: var(--clr-text);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.chat-empty {
+  text-align: center;
+  color: var(--clr-text-muted);
+  font-size: var(--fs-xs);
+  margin-top: var(--sp-8);
+}
+
+/* Message input */
+.chat-input-area {
+  padding: var(--sp-4) var(--sp-8);
+  border-top: 1px solid var(--clr-border);
+  display: flex;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+}
+
+.chat-input-area.hidden { display: none; }
+
+/* Error toast */
+.toast {
+  position: fixed;
+  bottom: var(--sp-6);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--clr-text);
+  color: #fff;
+  padding: var(--sp-3) var(--sp-6);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  z-index: 200;
+  opacity: 0;
+  transition: opacity var(--transition);
+  pointer-events: none;
+}
+
+.toast.show { opacity: 1; }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .radio-layout {
+    grid-template-columns: 1fr;
+    min-height: unset;
+  }
+
+  .player-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--clr-border);
+    padding: var(--sp-10) var(--sp-4);
+  }
+
+  .side-panel { min-height: 420px; }
+
+  .anecdotes-panel,
+  .pseudo-form,
+  .chat-messages,
+  .chat-input-area { padding-inline: var(--sp-4); }
+}

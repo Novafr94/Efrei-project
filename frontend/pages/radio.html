@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Timeless Radio — Listen to music from the 30s to the 70s.">
+  <meta name="theme-color" content="#f5f5f7">
+  <title>Listen — Timeless Radio</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/radio-player.css">
+</head>
+
+<body>
+  <a href="#content" class="sr-only">Skip to content</a>
+
+  <header class="nav" role="banner">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo" aria-label="Timeless Radio — Home">Timeless Radio</a>
+      <nav aria-label="Main navigation">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/radio" aria-current="page">Listen</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content">
+    <div class="radio-layout">
+
+      <!-- ── Left: Player ─────────────────────────────────── -->
+      <section class="player-panel" aria-labelledby="player-title">
+
+        <p class="player-label" aria-live="polite" aria-atomic="true">Now Playing</p>
+
+        <h1 id="player-title" class="player-title" id="track-title">—</h1>
+        <p class="player-artist" id="track-artist"></p>
+        <p class="player-year"   id="track-year"></p>
+
+        <!-- Hidden audio element -->
+        <audio id="audio" preload="none" aria-label="Radio stream"></audio>
+
+        <!-- Progress -->
+        <div class="player-progress" role="progressbar" aria-label="Track progress"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+          <span class="progress-time" id="time-current">0:00</span>
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+          </div>
+          <span class="progress-time" id="time-total">0:00</span>
+        </div>
+
+        <!-- Controls -->
+        <div class="player-controls">
+          <button class="btn-play" id="btn-play" aria-label="Play" aria-pressed="false">
+            <!-- Play icon -->
+            <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <!-- Pause icon (hidden by default) -->
+            <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true" style="display:none">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          </button>
+
+          <p class="player-listeners">
+            <span class="listener-dot" aria-hidden="true"></span>
+            <span id="listener-count">0</span> listening
+          </p>
+        </div>
+
+      </section>
+
+      <!-- ── Right: Side panel ─────────────────────────────── -->
+      <aside class="side-panel" aria-label="Anecdotes and chat">
+
+        <div class="panel-tabs" role="tablist" aria-label="Panel view">
+          <button class="panel-tab active" id="tab-anecdotes" role="tab"
+                  aria-selected="true" aria-controls="panel-anecdotes" data-panel="anecdotes">
+            Anecdotes
+          </button>
+          <button class="panel-tab" id="tab-chat" role="tab"
+                  aria-selected="false" aria-controls="panel-chat" data-panel="chat">
+            Live Chat
+          </button>
+        </div>
+
+        <!-- Anecdotes panel -->
+        <div class="anecdotes-panel" id="panel-anecdotes" role="tabpanel" aria-labelledby="tab-anecdotes">
+          <h2 class="anecdote-title" id="anecdote-title">Did you know?</h2>
+          <p class="anecdote-content" id="anecdote-content">Loading…</p>
+          <p class="anecdote-meta"  id="anecdote-meta"></p>
+        </div>
+
+        <!-- Chat panel (hidden by default) -->
+        <div class="chat-panel" id="panel-chat" role="tabpanel"
+             aria-labelledby="tab-chat" style="display:none">
+
+          <!-- Pseudo input (shown until user joins) -->
+          <form class="pseudo-form" id="pseudo-form" aria-label="Choose a display name">
+            <input class="input" id="pseudo-input" type="text"
+                   placeholder="Your name…" maxlength="20"
+                   aria-label="Display name (1-20 characters)" autocomplete="off">
+            <button class="btn btn-primary" type="submit" aria-label="Join the chat">Join</button>
+          </form>
+
+          <!-- Messages -->
+          <ol class="chat-messages" id="chat-messages" aria-live="polite" aria-label="Chat messages">
+            <li class="chat-empty">Be the first to say hello 👋</li>
+          </ol>
+
+          <!-- Message input (shown after joining) -->
+          <form class="chat-input-area hidden" id="chat-input-area" aria-label="Send a message">
+            <input class="input" id="message-input" type="text"
+                   placeholder="Say something…" maxlength="500"
+                   aria-label="Message" autocomplete="off">
+            <button class="btn btn-primary" type="submit" aria-label="Send message">Send</button>
+          </form>
+
+        </div>
+
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Error toast -->
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+  <!-- Socket.io client (served by the server automatically) -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/radio-player.js"></script>
+</body>
+</html>
