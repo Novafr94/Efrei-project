@@ -11,11 +11,17 @@ router.get('/tracks', (_req, res) => {
   res.json(db.prepare('SELECT * FROM tracks ORDER BY id ASC').all());
 });
 
+const FILENAME_REGEX = /^[\w\-]+\.(mp3|ogg|flac|wav|aac|m4a)$/i;
+
 router.post('/tracks', (req, res) => {
   const { title, artist, year, duration, filename, time_slot } = req.body;
 
   if (!title || !artist || !duration || !filename) {
     return res.status(400).json({ error: 'title, artist, duration and filename are required.' });
+  }
+
+  if (!FILENAME_REGEX.test(filename)) {
+    return res.status(400).json({ error: 'filename must be a simple audio filename (e.g. summertime.mp3).' });
   }
 
   const validSlots = ['morning', 'afternoon', 'evening', 'night', 'all'];
