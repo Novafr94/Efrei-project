@@ -85,5 +85,11 @@ Lets you manage tracks, anecdotes, and chat censor words.
 
 - `.env` is listed in `.gitignore` — **never commit it**.
 - The SQLite database file is also excluded from git.
-- `ADMIN_PASSWORD` must be a long, random secret in any non-local environment.
-- Set `CORS_ORIGIN` to your actual frontend domain in production.
+- `ADMIN_PASSWORD` **must** be a long, random secret in any non-local environment.  
+  The default value in `.env.example` (`CHANGE_ME_use_a_long_random_secret`) is a placeholder — replace it immediately. Generate a strong one with:
+  ```bash
+  node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+  ```
+- Set `CORS_ORIGIN` to your actual frontend domain in production (never leave `*` in production).
+- Serve the application behind HTTPS in production — the admin password travels as a Bearer token in HTTP headers.
+- The `/login` page and `backend/routes/auth.js` are placeholders reserved for Phase 2 user accounts.

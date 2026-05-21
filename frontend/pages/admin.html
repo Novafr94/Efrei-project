@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — Timeless Radio</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .admin-layout {
+      max-width: 860px;
+      margin-inline: auto;
+      padding: var(--sp-10) var(--sp-6);
+    }
+
+    /* Auth gate */
+    .auth-gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - var(--nav-height));
+      gap: var(--sp-4);
+    }
+
+    .auth-gate h1 { font-size: var(--fs-xl); }
+
+    .auth-form {
+      display: flex;
+      gap: var(--sp-2);
+      width: 100%;
+      max-width: 340px;
+    }
+
+    /* Sections */
+    .admin-section {
+      margin-bottom: var(--sp-12);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: var(--sp-6);
+      padding-bottom: var(--sp-4);
+      border-bottom: 1px solid var(--clr-border);
+    }
+
+    .section-title {
+      font-family: var(--ff-heading);
+      font-size: var(--fs-xl);
+      color: var(--clr-text);
+    }
+
+    /* Add form */
+    .add-form {
+      display: grid;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-6);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-3);
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--sp-3);
+    }
+
+    .field label {
+      display: block;
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      color: var(--clr-text-muted);
+      margin-bottom: var(--sp-1);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    select.input {
+      cursor: pointer;
+    }
+
+    /* Items list */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      padding: var(--sp-3) var(--sp-4);
+      background-color: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md);
+    }
+
+    .item-info { flex: 1; min-width: 0; }
+
+    .item-title {
+      font-weight: var(--fw-semibold);
+      font-size: var(--fs-sm);
+      color: var(--clr-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-meta {
+      font-size: var(--fs-xs);
+      color: var(--clr-text-muted);
+    }
+
+    .btn-delete {
+      flex-shrink: 0;
+      min-height: 44px;
+      min-width: 44px;
+      padding: var(--sp-1) var(--sp-3);
+      font-size: var(--fs-xs);
+      background: transparent;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-sm);
+      color: var(--clr-text-muted);
+      cursor: pointer;
+      transition: border-color var(--transition), color var(--transition);
+    }
+
+    .btn-delete:hover { border-color: #c0392b; color: #c0392b; }
+    .btn-delete:focus-visible { outline: 2px solid var(--clr-focus); outline-offset: 2px; }
+
+    .empty-state {
+      text-align: center;
+      color: var(--clr-text-muted);
+      font-size: var(--fs-xs);
+      padding: var(--sp-6);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: var(--sp-6);
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--clr-text);
+      color: #fff;
+      padding: var(--sp-3) var(--sp-6);
+      border-radius: var(--radius-md);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      z-index: 200;
+      opacity: 0;
+      transition: opacity var(--transition);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    @media (max-width: 600px) {
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="nav" role="banner">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo" aria-label="Timeless Radio — Home">Timeless Radio</a>
+      <nav aria-label="Main navigation">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/radio">Listen</a></li>
+          <li><a href="/admin" aria-current="page">Admin</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Auth gate (shown until password entered) -->
+  <div id="auth-gate" class="auth-gate">
+    <h1>Admin access</h1>
+    <form class="auth-form" id="auth-form" aria-label="Enter admin password">
+      <input class="input" id="password-input" type="password"
+             placeholder="Password" aria-label="Admin password" autocomplete="current-password">
+      <button class="btn btn-primary" type="submit">Enter</button>
+    </form>
+    <p class="text-muted text-sm" id="auth-error" aria-live="polite"></p>
+  </div>
+
+  <!-- Admin panel (shown after auth) -->
+  <main id="admin-panel" style="display:none" aria-label="Admin panel">
+    <div class="admin-layout">
+
+      <!-- ── Tracks ──────────────────────────────────────────── -->
+      <section class="admin-section" aria-labelledby="tracks-title">
+        <div class="section-header">
+          <h2 id="tracks-title" class="section-title">Tracks</h2>
+          <span class="text-muted text-sm" id="tracks-count"></span>
+        </div>
+
+        <form class="add-form" id="track-form" aria-label="Add a track">
+          <div class="form-row">
+            <div class="field">
+              <label for="track-title">Title *</label>
+              <input class="input" id="track-title" type="text" placeholder="Summertime" required>
+            </div>
+            <div class="field">
+              <label for="track-artist">Artist *</label>
+              <input class="input" id="track-artist" type="text" placeholder="Billie Holiday" required>
+            </div>
+          </div>
+          <div class="form-row-3">
+            <div class="field">
+              <label for="track-year">Year</label>
+              <input class="input" id="track-year" type="number" placeholder="1935" min="1900" max="1980">
+            </div>
+            <div class="field">
+              <label for="track-duration">Duration (sec) *</label>
+              <input class="input" id="track-duration" type="number" placeholder="180" min="1" required>
+            </div>
+            <div class="field">
+              <label for="track-slot">Time slot</label>
+              <select class="input" id="track-slot">
+                <option value="all">All day</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="evening">Evening</option>
+                <option value="night">Night</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="track-filename">Filename * <span class="text-muted">(e.g. summertime.mp3)</span></label>
+            <input class="input" id="track-filename" type="text" placeholder="summertime.mp3" required>
+          </div>
+          <div>
+            <button class="btn btn-primary" type="submit">Add track</button>
+          </div>
+        </form>
+
+        <div class="item-list" id="tracks-list"></div>
+      </section>
+
+      <!-- ── Anecdotes ───────────────────────────────────────── -->
+      <section class="admin-section" aria-labelledby="anecdotes-title">
+        <div class="section-header">
+          <h2 id="anecdotes-title" class="section-title">Anecdotes</h2>
+          <span class="text-muted text-sm" id="anecdotes-count"></span>
+        </div>
+
+        <form class="add-form" id="anecdote-form" aria-label="Add an anecdote">
+          <div class="field">
+            <label for="anecdote-title-input">Title *</label>
+            <input class="input" id="anecdote-title-input" type="text"
+                   placeholder="The birth of Jazz" required>
+          </div>
+          <div class="field">
+            <label for="anecdote-content">Content *</label>
+            <textarea class="input" id="anecdote-content" rows="3"
+                      placeholder="In the early 20th century…" required
+                      style="resize:vertical; height:auto"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="anecdote-artist">Artist <span class="text-muted">(optional)</span></label>
+              <input class="input" id="anecdote-artist" type="text" placeholder="Billie Holiday">
+            </div>
+            <div class="field">
+              <label for="anecdote-year">Year <span class="text-muted">(optional)</span></label>
+              <input class="input" id="anecdote-year" type="number" placeholder="1939" min="1900" max="1980">
+            </div>
+          </div>
+          <div>
+            <button class="btn btn-primary" type="submit">Add anecdote</button>
+          </div>
+        </form>
+
+        <div class="item-list" id="anecdotes-list"></div>
+      </section>
+
+      <!-- ── Censor words ────────────────────────────────────── -->
+      <section class="admin-section" aria-labelledby="censor-title">
+        <div class="section-header">
+          <h2 id="censor-title" class="section-title">Censor words</h2>
+          <span class="text-muted text-sm" id="censor-count"></span>
+        </div>
+
+        <form class="add-form" id="censor-form" aria-label="Add a banned word" style="max-width:400px">
+          <div class="form-row">
+            <div class="field">
+              <label for="censor-word">Word *</label>
+              <input class="input" id="censor-word" type="text" placeholder="badword" required>
+            </div>
+            <div class="field" style="display:flex;align-items:flex-end">
+              <button class="btn btn-primary" type="submit" style="width:100%">Add word</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="item-list" id="censor-list"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+  <script>
+    // ── Auth ────────────────────────────────────────────────
+    let AUTH_TOKEN = sessionStorage.getItem('admin_token') || '';
+
+    async function checkAuth(token) {
+      const res = await fetch('/api/admin/tracks', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return res.ok;
+    }
+
+    async function init() {
+      if (AUTH_TOKEN && await checkAuth(AUTH_TOKEN)) {
+        showPanel();
+      }
+    }
+
+    document.getElementById('auth-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pwd = document.getElementById('password-input').value;
+      if (await checkAuth(pwd)) {
+        AUTH_TOKEN = pwd;
+        sessionStorage.setItem('admin_token', pwd);
+        showPanel();
+      } else {
+        document.getElementById('auth-error').textContent = 'Incorrect password.';
+      }
+    });
+
+    function showPanel() {
+      document.getElementById('auth-gate').style.display  = 'none';
+      document.getElementById('admin-panel').style.display = '';
+      loadAll();
+    }
+
+    // ── Toast ───────────────────────────────────────────────
+    const toast = document.getElementById('toast');
+    let toastTimer;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ── API helpers ─────────────────────────────────────────
+    function authHeaders() {
+      return { 'Content-Type': 'application/json', Authorization: `Bearer ${AUTH_TOKEN}` };
+    }
+
+    async function apiFetch(url, opts = {}) {
+      const res = await fetch(url, { ...opts, headers: authHeaders() });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Error ${res.status}`);
+      }
+      return res.json();
+    }
+
+    // ── Tracks ──────────────────────────────────────────────
+    async function loadTracks() {
+      const tracks = await apiFetch('/api/admin/tracks');
+      document.getElementById('tracks-count').textContent = `${tracks.length} track${tracks.length !== 1 ? 's' : ''}`;
+      const list = document.getElementById('tracks-list');
+      if (!tracks.length) {
+        list.innerHTML = '<p class="empty-state">No tracks yet.</p>';
+        return;
+      }
+      list.innerHTML = tracks.map(t => `
+        <div class="item-row">
+          <div class="item-info">
+            <div class="item-title">${esc(t.title)}</div>
+            <div class="item-meta">${esc(t.artist)} · ${t.year || '—'} · ${t.duration}s · ${t.time_slot} · ${esc(t.filename)}</div>
+          </div>
+          <button class="btn-delete" data-id="${t.id}" data-type="track" aria-label="Delete ${esc(t.title)}">Delete</button>
+        </div>`).join('');
+    }
+
+    document.getElementById('track-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await apiFetch('/api/admin/tracks', {
+          method: 'POST',
+          body: JSON.stringify({
+            title:     document.getElementById('track-title').value.trim(),
+            artist:    document.getElementById('track-artist').value.trim(),
+            year:      document.getElementById('track-year').value || null,
+            duration:  document.getElementById('track-duration').value,
+            filename:  document.getElementById('track-filename').value.trim(),
+            time_slot: document.getElementById('track-slot').value,
+          })
+        });
+        e.target.reset();
+        showToast('Track added.');
+        loadTracks();
+      } catch (err) { showToast(err.message); }
+    });
+
+    // ── Anecdotes ───────────────────────────────────────────
+    async function loadAnecdotes() {
+      const items = await apiFetch('/api/admin/anecdotes');
+      document.getElementById('anecdotes-count').textContent = `${items.length} anecdote${items.length !== 1 ? 's' : ''}`;
+      const list = document.getElementById('anecdotes-list');
+      if (!items.length) {
+        list.innerHTML = '<p class="empty-state">No anecdotes yet.</p>';
+        return;
+      }
+      list.innerHTML = items.map(a => `
+        <div class="item-row">
+          <div class="item-info">
+            <div class="item-title">${esc(a.title)}</div>
+            <div class="item-meta">${esc(a.content.slice(0, 80))}${a.content.length > 80 ? '…' : ''}</div>
+          </div>
+          <button class="btn-delete" data-id="${a.id}" data-type="anecdote" aria-label="Delete ${esc(a.title)}">Delete</button>
+        </div>`).join('');
+    }
+
+    document.getElementById('anecdote-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await apiFetch('/api/admin/anecdotes', {
+          method: 'POST',
+          body: JSON.stringify({
+            title:   document.getElementById('anecdote-title-input').value.trim(),
+            content: document.getElementById('anecdote-content').value.trim(),
+            artist:  document.getElementById('anecdote-artist').value.trim() || null,
+            year:    document.getElementById('anecdote-year').value || null,
+          })
+        });
+        e.target.reset();
+        showToast('Anecdote added.');
+        loadAnecdotes();
+      } catch (err) { showToast(err.message); }
+    });
+
+    // ── Censor words ────────────────────────────────────────
+    async function loadCensor() {
+      const items = await apiFetch('/api/admin/censor');
+      document.getElementById('censor-count').textContent = `${items.length} word${items.length !== 1 ? 's' : ''}`;
+      const list = document.getElementById('censor-list');
+      if (!items.length) {
+        list.innerHTML = '<p class="empty-state">No banned words.</p>';
+        return;
+      }
+      list.innerHTML = items.map(w => `
+        <div class="item-row">
+          <div class="item-info">
+            <div class="item-title">${esc(w.word)}</div>
+          </div>
+          <button class="btn-delete" data-id="${w.id}" data-type="censor" aria-label="Remove ${esc(w.word)}">Remove</button>
+        </div>`).join('');
+    }
+
+    document.getElementById('censor-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await apiFetch('/api/admin/censor', {
+          method: 'POST',
+          body: JSON.stringify({ word: document.getElementById('censor-word').value.trim() })
+        });
+        e.target.reset();
+        showToast('Word added.');
+        loadCensor();
+      } catch (err) { showToast(err.message); }
+    });
+
+    // ── Delete (event delegation) ───────────────────────────
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.btn-delete');
+      if (!btn) return;
+      const { id, type } = btn.dataset;
+      const urlMap = { track: 'tracks', anecdote: 'anecdotes', censor: 'censor' };
+      const reloadMap = { track: loadTracks, anecdote: loadAnecdotes, censor: loadCensor };
+      try {
+        await apiFetch(`/api/admin/${urlMap[type]}/${id}`, { method: 'DELETE' });
+        showToast('Deleted.');
+        reloadMap[type]();
+      } catch (err) { showToast(err.message); }
+    });
+
+    // ── Load all ────────────────────────────────────────────
+    function loadAll() {
+      loadTracks();
+      loadAnecdotes();
+      loadCensor();
+    }
+
+    // XSS-safe escaping for innerHTML
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    init();
+  </script>
+</body>
+</html>
