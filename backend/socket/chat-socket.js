@@ -69,9 +69,12 @@ module.exports = (io) => {
 
     // ── Disconnect ──────────────────────────────────────────
     socket.on('disconnect', () => {
+      // Always clean up rateLimiter regardless of whether the socket joined,
+      // to prevent unbounded Map growth from unauthenticated connections.
+      rateLimiter.delete(socket.id);
+
       if (activeUsers.has(socket.id)) {
         activeUsers.delete(socket.id);
-        rateLimiter.delete(socket.id);
         broadcastListenerCount();
         db.prepare("INSERT INTO analytics (event) VALUES ('listener_left')").run();
       }
