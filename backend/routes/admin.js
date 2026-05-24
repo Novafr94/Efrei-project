@@ -20,6 +20,10 @@ router.post('/tracks', (req, res) => {
     return res.status(400).json({ error: 'title, artist, duration and filename are required.' });
   }
 
+  if (String(title).length > 200 || String(artist).length > 200) {
+    return res.status(400).json({ error: 'title and artist must be 200 characters or fewer.' });
+  }
+
   if (!FILENAME_REGEX.test(filename)) {
     return res.status(400).json({ error: 'filename must be a simple audio filename (e.g. summertime.mp3).' });
   }
@@ -54,6 +58,10 @@ router.post('/anecdotes', (req, res) => {
     return res.status(400).json({ error: 'title and content are required.' });
   }
 
+  if (String(title).length > 200 || String(content).length > 2000) {
+    return res.status(400).json({ error: 'title must be ≤200 chars and content ≤2000 chars.' });
+  }
+
   const stmt   = db.prepare(
     'INSERT INTO anecdotes (title, content, artist, year) VALUES (?, ?, ?, ?)'
   );
@@ -78,6 +86,10 @@ router.post('/censor', (req, res) => {
   const { word } = req.body;
   if (!word || typeof word !== 'string' || !word.trim()) {
     return res.status(400).json({ error: 'word is required.' });
+  }
+
+  if (word.trim().length > 100) {
+    return res.status(400).json({ error: 'word must be 100 characters or fewer.' });
   }
 
   try {

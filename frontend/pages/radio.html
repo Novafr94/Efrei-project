@@ -8,21 +8,6 @@
   <title>Listen — Timeless Radio</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/radio-player.css">
-  <style>
-    .skip-link {
-      position: absolute;
-      top: -100px;
-      left: var(--sp-4);
-      background-color: var(--clr-text);
-      color: #fff;
-      padding: var(--sp-3) var(--sp-5);
-      border-radius: var(--radius-md);
-      font-weight: var(--fw-semibold);
-      z-index: 200;
-      transition: top var(--transition);
-    }
-    .skip-link:focus { top: var(--sp-3); color: #fff; outline: 3px solid var(--clr-focus); outline-offset: 2px; }
-  </style>
 </head>
 
 <body>
@@ -44,7 +29,7 @@
     <div class="radio-layout">
 
       <!-- ── Left: Player ─────────────────────────────────── -->
-      <section class="player-panel" aria-labelledby="player-title">
+      <section class="player-panel" aria-labelledby="track-title">
 
         <p class="player-label" aria-live="polite" aria-atomic="true">Now Playing</p>
 

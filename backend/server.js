@@ -33,9 +33,13 @@ app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  // HSTS — ignored over plain HTTP, enforced by browsers once set over HTTPS
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss:; media-src 'self'; img-src 'self' data:"
+    // unsafe-inline removed from script-src — all page JS is now in external files
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss:; media-src 'self'; img-src 'self' data:"
   );
   next();
 });
@@ -65,4 +69,11 @@ server.listen(PORT, () => {
   }
 });
 
-module.exports = { db, io };
+// ── Graceful shutdown ─────────────────────────────────────────
+function shutdown() {
+  server.close(() => process.exit(0));
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT',  shutdown);
+
+module.exports = { io };
