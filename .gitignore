@@ -11,6 +11,9 @@ node_modules/
 *.db
 *.sqlite
 
+# Upload temp files
+frontend/audio/.tmp/
+
 # Logs
 *.log
 npm-debug.log*

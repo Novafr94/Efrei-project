@@ -10,9 +10,16 @@ CREATE TABLE IF NOT EXISTS tracks (
   year        INTEGER,
   duration    INTEGER NOT NULL, -- duration in seconds
   filename    TEXT    NOT NULL, -- e.g. "billie-holiday-summertime.mp3"
-  time_slot   TEXT    NOT NULL DEFAULT 'all', -- morning | afternoon | evening | night | all
+  time_slot   TEXT    NOT NULL DEFAULT 'all', -- energetic | calm | jazz | all
   added_at    TEXT    NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Migrations: schema version tracking
+CREATE TABLE IF NOT EXISTS migrations (
+  id      INTEGER PRIMARY KEY CHECK (id = 1),
+  version INTEGER NOT NULL DEFAULT 0
+);
+INSERT OR IGNORE INTO migrations (id, version) VALUES (1, 0);
 
 -- Messages: live chat history
 CREATE TABLE IF NOT EXISTS messages (
@@ -59,12 +66,12 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Tracks (public domain / royalty-free placeholders)
 INSERT OR IGNORE INTO tracks (id, title, artist, year, duration, filename, time_slot) VALUES
-  (1, 'Summertime',          'Various Artists', 1935, 180, 'summertime.mp3',        'morning'),
-  (2, 'Moonlight Serenade',  'Various Artists', 1939, 210, 'moonlight-serenade.mp3','evening'),
-  (3, 'Take Five',           'Various Artists', 1959, 324, 'take-five.mp3',         'afternoon'),
-  (4, 'Round Midnight',      'Various Artists', 1944, 252, 'round-midnight.mp3',    'night'),
-  (5, 'Blue Bossa',          'Various Artists', 1963, 276, 'blue-bossa.mp3',        'afternoon'),
-  (6, 'Autumn Leaves',       'Various Artists', 1945, 198, 'autumn-leaves.mp3',     'evening'),
+  (1, 'Summertime',          'Various Artists', 1935, 180, 'summertime.mp3',        'energetic'),
+  (2, 'Moonlight Serenade',  'Various Artists', 1939, 210, 'moonlight-serenade.mp3','calm'),
+  (3, 'Take Five',           'Various Artists', 1959, 324, 'take-five.mp3',         'all'),
+  (4, 'Round Midnight',      'Various Artists', 1944, 252, 'round-midnight.mp3',    'jazz'),
+  (5, 'Blue Bossa',          'Various Artists', 1963, 276, 'blue-bossa.mp3',        'all'),
+  (6, 'Autumn Leaves',       'Various Artists', 1945, 198, 'autumn-leaves.mp3',     'calm'),
   (7, 'So What',             'Various Artists', 1959, 558, 'so-what.mp3',           'all');
 
 -- Anecdotes
