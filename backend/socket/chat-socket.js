@@ -18,9 +18,11 @@ module.exports = (io) => {
   io.on('connection', (socket) => {
     // ── Join ────────────────────────────────────────────────
     socket.on('join', ({ pseudo }) => {
-      if (!pseudo || !PSEUDO_REGEX.test(pseudo)) {
+      const trimmedPseudo = typeof pseudo === 'string' ? pseudo.trim() : '';
+      if (!trimmedPseudo || !PSEUDO_REGEX.test(trimmedPseudo)) {
         return socket.emit('error', { message: 'Invalid pseudo. Use 1-20 alphanumeric characters.' });
       }
+      pseudo = trimmedPseudo;
 
       activeUsers.set(socket.id, pseudo);
       broadcastListenerCount();

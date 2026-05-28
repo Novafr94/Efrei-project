@@ -21,7 +21,7 @@
   font-weight: var(--fw-semibold);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--clr-copper);
+  color: var(--clr-copper-dark);
   margin-bottom: var(--sp-5);
 }
 
