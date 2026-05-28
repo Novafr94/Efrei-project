@@ -18,7 +18,7 @@ setInterval(() => {
 }, CLEANUP_INTERVAL).unref();
 
 function authMiddleware(req, res, next) {
-  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
 
   const header   = req.headers['authorization'] || '';
   const token    = header.startsWith('Bearer ') ? header.slice(7) : '';
