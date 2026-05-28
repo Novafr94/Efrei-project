@@ -7,7 +7,8 @@ const http    = require('http');
 const { Server } = require('socket.io');
 const cors   = require('cors');
 
-const db = require('./db');
+const db     = require('./db');
+const autoDJ = require('./engine/autoDJ');
 
 // ── App setup ─────────────────────────────────────────────────
 const app    = express();
@@ -50,12 +51,17 @@ app.get('/login', (_req, res) => res.sendFile(path.join(__dirname, '../frontend/
 
 // ── API routes ─────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
-app.use('/api/radio',  require('./routes/radio')(io));   // io injected to break circular dep
+app.use('/api/radio',  require('./routes/radio')(io, autoDJ));
 app.use('/api/chat',   require('./routes/chat'));
-app.use('/api/admin',  require('./middleware/authMiddleware'), require('./routes/admin'));
+app.use('/api/admin',  require('./middleware/authMiddleware'), require('./routes/admin')(autoDJ));
+app.use('/api/admin/queue',  require('./middleware/authMiddleware'), require('./routes/queue'));
+app.use('/api/admin/upload', require('./middleware/authMiddleware'), require('./routes/upload'));
 
 // ── Socket.io ─────────────────────────────────────────────────
 require('./socket/chat-socket')(io);
+
+// ── Auto-DJ engine ────────────────────────────────────────────
+autoDJ.init(db, io);
 
 // ── Start ──────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3004;

@@ -233,6 +233,14 @@ socket.on('listener_count', ({ count }) => {
 // Server errors
 socket.on('error', ({ message }) => showToast(message));
 
+// Auto-DJ track changes (real-time sync)
+socket.on('track_change', (data) => {
+  if (data.track) {
+    currentTrack = data.track;
+    renderTrack(data.track, data.position || 0);
+  }
+});
+
 // ── Init ──────────────────────────────────────────────────────
 fetchNowPlaying();
 fetchAnecdote();
