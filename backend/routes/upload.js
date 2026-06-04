@@ -57,6 +57,13 @@ router.post('/', upload.array('files', MAX_FILE_COUNT), async (req, res) => {
   }
 
   const { parseFile } = await import('music-metadata');
+  const categoryId = Number(req.body.category_id) || 1;
+  const categoryExists = db.prepare('SELECT id FROM categories WHERE id = ?').get(categoryId);
+
+  if (!categoryExists) {
+    return res.status(400).json({ error: 'Selected category does not exist.' });
+  }
+
   const results = [];
 
   for (const file of req.files) {
@@ -116,9 +123,9 @@ router.post('/', upload.array('files', MAX_FILE_COUNT), async (req, res) => {
     }
 
     const stmt   = db.prepare(
-      'INSERT INTO tracks (title, artist, year, duration, filename, time_slot) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO tracks (title, artist, year, duration, filename, time_slot, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
-    const result = stmt.run(title, artist, year, duration, filename, 'all');
+    const result = stmt.run(title, artist, year, duration, filename, 'all', categoryId);
 
     autoDJ.onTrackAdded();
 

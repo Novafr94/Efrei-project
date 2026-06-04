@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Timeless Radio — Listen to music from the 30s to the 70s.">
-  <meta name="theme-color" content="#f5f5f7">
-  <title>Listen — Timeless Radio</title>
+  <meta name="description" content="Remembrance FM — listen to music from the 30s to the 70s.">
+  <meta name="theme-color" content="#fff9e8">
+  <title>Listen — Remembrance FM</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/radio-player.css">
   <style>
@@ -30,12 +30,19 @@
 
   <header class="nav" role="banner">
     <div class="container nav-inner">
-      <a href="/" class="nav-logo" aria-label="Timeless Radio — Home">Timeless Radio</a>
-      <nav aria-label="Main navigation">
-        <ul class="nav-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="/radio" aria-current="page">Listen</a></li>
-          <li><a href="/admin">Admin</a></li>
+      <div class="nav-group">
+        <a href="/" class="nav-logo" aria-label="Remembrance FM — Home">Remembrance FM</a>
+        <nav aria-label="Main navigation">
+          <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/radio" aria-current="page">Listen</a></li>
+          </ul>
+        </nav>
+      </div>
+      <nav aria-label="External links">
+        <ul class="nav-links nav-external-links">
+          <li><a href="https://www.ww1rc.org.uk/" target="_blank" rel="noopener noreferrer">WW1 Centre</a></li>
+          <li><a href="https://www.youtube.com/@WW1remcen" target="_blank" rel="noopener noreferrer">YouTube</a></li>
         </ul>
       </nav>
     </div>
@@ -46,43 +53,60 @@
 
       <!-- ── Left: Player ─────────────────────────────────── -->
       <section class="player-panel" aria-labelledby="player-title">
-
-        <p class="player-label" aria-live="polite" aria-atomic="true">Now Playing</p>
-
-        <h1 id="track-title" class="player-title">—</h1>
-        <p class="player-artist" id="track-artist"></p>
-        <p class="player-year"   id="track-year"></p>
-
-        <!-- Hidden audio element -->
-        <audio id="audio" preload="none" aria-label="Radio stream"></audio>
-
-        <!-- Progress -->
-        <div class="player-progress" role="progressbar" aria-label="Track progress"
-             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
-          <span class="progress-time" id="time-current">0:00</span>
-          <div class="progress-track">
-            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        <div class="player-shell">
+          <div class="volume-drawer" id="volume-control" aria-label="Volume control">
+            <button class="volume-toggle" id="volume-toggle" type="button" aria-expanded="false" aria-controls="volume-panel" aria-label="Open volume control">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12zm2.5 0a7 7 0 0 0-4-6.32v12.64A7 7 0 0 0 19 12z"/>
+              </svg>
+            </button>
+            <div class="volume-panel" id="volume-panel">
+              <span class="volume-value" id="volume-value" aria-live="polite">50%</span>
+              <div class="volume-slider-wrap">
+                <input class="volume-slider" id="volume-slider" type="range" min="0" max="100" step="1" value="50" aria-label="Volume slider">
+              </div>
+            </div>
           </div>
-          <span class="progress-time" id="time-total">0:00</span>
-        </div>
 
-        <!-- Controls -->
-        <div class="player-controls">
-          <button class="btn-play" id="btn-play" aria-label="Play" aria-pressed="false">
-            <!-- Play icon -->
-            <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-            <!-- Pause icon (hidden by default) -->
-            <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true" style="display:none">
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-            </svg>
-          </button>
+          <div class="player-content">
+            <p class="player-label" id="radio-status" aria-live="polite" aria-atomic="true">Loading…</p>
 
-          <p class="player-listeners">
-            <span class="listener-dot" aria-hidden="true"></span>
-            <span id="listener-count">0</span> listening
-          </p>
+            <h1 id="track-title" class="player-title">—</h1>
+            <p class="player-artist" id="track-artist"></p>
+            <p class="player-year"   id="track-year"></p>
+
+            <!-- Hidden audio element -->
+            <audio id="audio" preload="none" aria-label="Radio stream"></audio>
+
+            <!-- Progress -->
+            <div class="player-progress" role="progressbar" aria-label="Track progress"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+              <span class="progress-time" id="time-current">0:00</span>
+              <div class="progress-track">
+                <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+              </div>
+              <span class="progress-time" id="time-total">0:00</span>
+            </div>
+
+            <!-- Controls -->
+            <div class="player-controls">
+              <button class="btn-play" id="btn-play" aria-label="Play" aria-pressed="false">
+                <!-- Play icon -->
+                <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+                <!-- Pause icon (hidden by default) -->
+                <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true" style="display:none">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              </button>
+
+              <p class="player-listeners">
+                <span class="listener-dot" aria-hidden="true"></span>
+                <span id="listener-count">0</span> listening
+              </p>
+            </div>
+          </div>
         </div>
 
       </section>
@@ -139,6 +163,15 @@
 
     </div>
   </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p class="text-muted text-sm">&copy; 2026 Remembrance FM &middot; EFREI Student Project with Charles Haskell</p>
+      <nav class="footer-links" aria-label="Footer links">
+        <a href="/admin">Admin</a>
+      </nav>
+    </div>
+  </footer>
 
   <!-- Error toast -->
   <div class="toast" id="toast" role="alert" aria-live="assertive"></div>

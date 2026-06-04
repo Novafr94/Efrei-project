@@ -6,16 +6,20 @@ module.exports = (io, autoDJ) => {
   const router = express.Router();
 
   router.get('/now-playing', (_req, res) => {
-    const data = autoDJ.getNowPlaying();
-    if (!data) {
-      return res.status(404).json({ error: 'No tracks in library. Add tracks via /api/admin/tracks.' });
-    }
-    res.json(data);
+    res.json(autoDJ.getNowPlaying());
+  });
+
+  router.get('/status', (_req, res) => {
+    res.json(autoDJ.getRadioSettings());
   });
 
   router.get('/anecdotes', (_req, res) => {
     const anecdote = db.prepare(
-      'SELECT * FROM anecdotes ORDER BY RANDOM() LIMIT 1'
+      `SELECT a.*, c.name AS category_name
+       FROM anecdotes a
+       LEFT JOIN categories c ON c.id = a.category_id
+       ORDER BY RANDOM()
+       LIMIT 1`
     ).get();
 
     if (!anecdote) return res.status(404).json({ error: 'No anecdotes found.' });

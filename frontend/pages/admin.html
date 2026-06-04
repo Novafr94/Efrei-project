@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin — Timeless Radio</title>
+  <meta name="theme-color" content="#fff9e8">
+  <title>Admin — Remembrance FM</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     .skip-link {
@@ -50,19 +51,110 @@
       margin-bottom: var(--sp-12);
     }
 
+    .admin-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-3);
+      flex-wrap: wrap;
+      padding: var(--sp-4);
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--sp-4);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-1) var(--sp-3);
+      border-radius: 999px;
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      background: rgba(107, 62, 16, 0.08);
+      color: var(--clr-copper-dark);
+    }
+
+    .status-pill.is-stopped {
+      background: rgba(192, 57, 43, 0.12);
+      color: #c0392b;
+    }
+
+    .status-pill.is-active {
+      background: rgba(39, 174, 96, 0.12);
+      color: #1f8a4c;
+    }
+
+    .status-pill.is-warning {
+      background: rgba(211, 84, 0, 0.12);
+      color: #b04e00;
+    }
+
     .section-header {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
+      gap: var(--sp-4);
       margin-bottom: var(--sp-6);
       padding-bottom: var(--sp-4);
       border-bottom: 1px solid var(--clr-border);
+    }
+
+    .section-header-main {
+      display: flex;
+      align-items: baseline;
+      gap: var(--sp-3);
+      flex-wrap: wrap;
+      min-width: 0;
     }
 
     .section-title {
       font-family: var(--ff-heading);
       font-size: var(--fs-xl);
       color: var(--clr-text);
+    }
+
+    .section-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      min-width: 44px;
+      min-height: 44px;
+      padding: var(--sp-2);
+      background: transparent;
+      border: 1px solid var(--clr-border);
+      border-radius: 999px;
+      color: var(--clr-text-muted);
+      cursor: pointer;
+      transition: color var(--transition), border-color var(--transition), background-color var(--transition);
+    }
+
+    .section-toggle:hover {
+      color: var(--clr-text);
+      border-color: var(--clr-copper-dark);
+      background-color: var(--clr-surface);
+    }
+
+    .section-toggle:focus-visible {
+      outline: 2px solid var(--clr-focus);
+      outline-offset: 2px;
+    }
+
+    .section-toggle-icon {
+      width: 18px;
+      height: 18px;
+      transition: transform var(--transition);
+      transform-origin: center;
+    }
+
+    .admin-section.is-collapsed .section-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .admin-section.is-collapsed .section-body {
+      display: none;
     }
 
     /* Add form */
@@ -186,12 +278,19 @@
 
   <header class="nav" role="banner">
     <div class="container nav-inner">
-      <a href="/" class="nav-logo" aria-label="Timeless Radio — Home">Timeless Radio</a>
-      <nav aria-label="Main navigation">
-        <ul class="nav-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="/radio">Listen</a></li>
-          <li><a href="/admin" aria-current="page">Admin</a></li>
+      <div class="nav-group">
+        <a href="/" class="nav-logo" aria-label="Remembrance FM — Home">Remembrance FM</a>
+        <nav aria-label="Main navigation">
+          <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/radio">Listen</a></li>
+          </ul>
+        </nav>
+      </div>
+      <nav aria-label="External links">
+        <ul class="nav-links nav-external-links">
+          <li><a href="https://www.ww1rc.org.uk/" target="_blank" rel="noopener noreferrer">WW1 Centre</a></li>
+          <li><a href="https://www.youtube.com/@WW1remcen" target="_blank" rel="noopener noreferrer">YouTube</a></li>
         </ul>
       </nav>
     </div>
@@ -212,158 +311,334 @@
   <main id="admin-panel" style="display:none" aria-label="Admin panel" tabindex="-1">
     <div class="admin-layout">
 
+      <!-- ── Radio Control ─────────────────────────────────── -->
+      <section class="admin-section" aria-labelledby="radio-title">
+        <div class="section-header">
+          <div class="section-header-main">
+            <h2 id="radio-title" class="section-title">Radio Control</h2>
+          </div>
+          <button class="section-toggle" type="button" aria-expanded="true" aria-controls="radio-section-body" aria-label="Collapse Radio Control section">
+            <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="section-body" id="radio-section-body">
+          <div class="admin-status-bar">
+            <div>
+              <div class="status-pill" id="radio-status-pill">Loading…</div>
+              <p class="text-muted text-sm" id="radio-status-message" style="margin-top:var(--sp-2)">—</p>
+            </div>
+            <button class="btn btn-outline" id="radio-toggle-btn" type="button">Stop radio</button>
+          </div>
+
+          <form class="add-form" id="radio-settings-form" aria-label="Configure radio schedule">
+            <div class="form-row">
+              <div class="field">
+                <label for="radio-start-time">Start time</label>
+                <input class="input" id="radio-start-time" type="time" value="06:00" required>
+              </div>
+              <div class="field">
+                <label for="radio-end-time">End time</label>
+                <input class="input" id="radio-end-time" type="time" value="23:00" required>
+              </div>
+            </div>
+            <div style="display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap">
+              <button class="btn btn-primary" type="submit">Save schedule</button>
+              <p class="text-muted text-sm" id="radio-schedule-hint">Playback runs only inside the configured window.</p>
+            </div>
+          </form>
+        </div>
+      </section>
+
       <!-- ── Now Playing & Queue ──────────────────────────────── -->
       <section class="admin-section" aria-labelledby="queue-title">
         <div class="section-header">
-          <h2 id="queue-title" class="section-title">Now Playing & Queue</h2>
+          <div class="section-header-main">
+            <h2 id="queue-title" class="section-title">Now Playing & Queue</h2>
+          </div>
+          <button class="section-toggle" type="button" aria-expanded="true" aria-controls="queue-section-body" aria-label="Collapse Now Playing and Queue section">
+            <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"></path>
+            </svg>
+          </button>
         </div>
 
-        <div id="now-playing-box" style="padding:var(--sp-4);background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-md);margin-bottom:var(--sp-4)">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4)">
-            <div id="np-info">
-              <div class="item-title" id="np-title">—</div>
-              <div class="item-meta" id="np-meta">—</div>
+        <div class="section-body" id="queue-section-body">
+          <div id="now-playing-box" style="padding:var(--sp-4);background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-md);margin-bottom:var(--sp-4)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4)">
+              <div id="np-info">
+                <div class="item-title" id="np-title">—</div>
+                <div class="item-meta" id="np-meta">—</div>
+              </div>
+              <button class="btn btn-outline" id="btn-skip" type="button" aria-label="Skip to next track" style="min-height:44px;min-width:44px">Skip</button>
             </div>
-            <button class="btn btn-outline" id="btn-skip" type="button" aria-label="Skip to next track" style="min-height:44px;min-width:44px">Skip</button>
+            <div style="margin-top:var(--sp-2);height:3px;background:var(--clr-border);border-radius:2px;overflow:hidden">
+              <div id="np-progress" style="height:100%;width:0%;background:var(--clr-copper);transition:width 1s linear"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:var(--sp-1)">
+              <span class="text-muted text-sm" id="np-time">0:00</span>
+              <span class="text-muted text-sm" id="np-duration">0:00</span>
+            </div>
           </div>
-          <div style="margin-top:var(--sp-2);height:3px;background:var(--clr-border);border-radius:2px;overflow:hidden">
-            <div id="np-progress" style="height:100%;width:0%;background:var(--clr-copper);transition:width 1s linear"></div>
+
+          <form id="queue-add-form" style="display:flex;gap:var(--sp-2);margin-bottom:var(--sp-4)" aria-label="Add to queue">
+            <select class="input" id="queue-track-select" style="flex:1" aria-label="Select a track">
+              <option value="">— Select a track —</option>
+            </select>
+            <button class="btn btn-primary" type="submit" style="min-height:48px">Add</button>
+          </form>
+
+          <div id="queue-list" class="item-list"></div>
+        </div>
+      </section>
+
+      <!-- ── Categories ─────────────────────────────────────── -->
+      <section class="admin-section" aria-labelledby="categories-title">
+        <div class="section-header">
+          <div class="section-header-main">
+            <h2 id="categories-title" class="section-title">Categories</h2>
+            <span class="text-muted text-sm" id="categories-count"></span>
           </div>
-          <div style="display:flex;justify-content:space-between;margin-top:var(--sp-1)">
-            <span class="text-muted text-sm" id="np-time">0:00</span>
-            <span class="text-muted text-sm" id="np-duration">0:00</span>
-          </div>
+          <button class="section-toggle" type="button" aria-expanded="true" aria-controls="categories-section-body" aria-label="Collapse Categories section">
+            <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"></path>
+            </svg>
+          </button>
         </div>
 
-        <form id="queue-add-form" style="display:flex;gap:var(--sp-2);margin-bottom:var(--sp-4)" aria-label="Add to queue">
-          <select class="input" id="queue-track-select" style="flex:1" aria-label="Select a track">
-            <option value="">— Select a track —</option>
-          </select>
-          <button class="btn btn-primary" type="submit" style="min-height:48px">Add</button>
-        </form>
+        <div class="section-body" id="categories-section-body">
+          <form class="add-form" id="category-form" aria-label="Add or rename a category" style="max-width:480px">
+            <div class="form-row">
+              <div class="field">
+                <label for="category-name-input">Category name *</label>
+                <input class="input" id="category-name-input" type="text" placeholder="Jazz" required>
+              </div>
+              <div class="field" style="display:flex;align-items:flex-end;gap:var(--sp-2)">
+                <button class="btn btn-primary" type="submit" id="category-submit-btn" style="width:100%">Add category</button>
+                <button class="btn btn-outline" type="button" id="category-cancel-btn" hidden>Cancel</button>
+              </div>
+            </div>
+          </form>
 
-        <div id="queue-list" class="item-list"></div>
+          <div class="item-list" id="categories-list"></div>
+        </div>
       </section>
 
       <!-- ── Tracks ──────────────────────────────────────────── -->
       <section class="admin-section" aria-labelledby="tracks-title">
         <div class="section-header">
-          <h2 id="tracks-title" class="section-title">Tracks</h2>
-          <span class="text-muted text-sm" id="tracks-count"></span>
+          <div class="section-header-main">
+            <h2 id="tracks-title" class="section-title">Tracks</h2>
+            <span class="text-muted text-sm" id="tracks-count"></span>
+          </div>
+          <button class="section-toggle" type="button" aria-expanded="true" aria-controls="tracks-section-body" aria-label="Collapse Tracks section">
+            <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"></path>
+            </svg>
+          </button>
         </div>
 
-        <!-- Upload zone -->
-        <div id="upload-zone" style="border:2px dashed var(--clr-border);border-radius:var(--radius-md);padding:var(--sp-8);text-align:center;margin-bottom:var(--sp-6);cursor:pointer;transition:border-color var(--transition)" aria-label="Zone d'upload MP3" role="button" tabindex="0">
-          <p style="font-size:var(--fs-sm);color:var(--clr-text-muted);margin-bottom:var(--sp-2)">Drop MP3 files here or click to select</p>
-          <input type="file" id="upload-input" multiple accept=".mp3" style="display:none">
-          <div id="upload-file-list" style="margin-top:var(--sp-3);text-align:left"></div>
-          <button class="btn btn-primary" id="btn-upload" type="button" style="display:none;margin-top:var(--sp-3);min-height:48px">Upload</button>
-          <div id="upload-progress" style="margin-top:var(--sp-3)"></div>
-          <div id="upload-results" style="margin-top:var(--sp-3)"></div>
+        <div class="section-body" id="tracks-section-body">
+          <!-- Upload zone -->
+          <div class="field" style="max-width:260px;margin-bottom:var(--sp-4)">
+            <label for="upload-category">Upload category</label>
+            <select class="input" id="upload-category"></select>
+          </div>
+
+          <div id="upload-zone" style="border:2px dashed var(--clr-border);border-radius:var(--radius-md);padding:var(--sp-8);text-align:center;margin-bottom:var(--sp-6);cursor:pointer;transition:border-color var(--transition)" aria-label="MP3 upload zone" role="button" tabindex="0">
+            <p style="font-size:var(--fs-sm);color:var(--clr-text-muted);margin-bottom:var(--sp-2)">Drop MP3 files here or click to select</p>
+            <input type="file" id="upload-input" multiple accept=".mp3" style="display:none">
+            <div id="upload-file-list" style="margin-top:var(--sp-3);text-align:left"></div>
+            <button class="btn btn-primary" id="btn-upload" type="button" style="display:none;margin-top:var(--sp-3);min-height:48px">Upload</button>
+            <div id="upload-progress" style="margin-top:var(--sp-3)"></div>
+            <div id="upload-results" style="margin-top:var(--sp-3)"></div>
+          </div>
+
+          <details id="track-form-details" style="margin-bottom:var(--sp-6)">
+            <summary style="cursor:pointer;font-size:var(--fs-sm);color:var(--clr-text-muted);font-weight:var(--fw-semibold)">Manual entry</summary>
+          <form class="add-form" id="track-form" aria-label="Add a track" style="margin-top:var(--sp-3)">
+            <div class="form-row">
+              <div class="field">
+                <label for="track-title">Title *</label>
+                <input class="input" id="track-title" type="text" placeholder="Summertime" required>
+              </div>
+              <div class="field">
+                <label for="track-artist">Artist *</label>
+                <input class="input" id="track-artist" type="text" placeholder="Billie Holiday" required>
+              </div>
+            </div>
+            <div class="form-row-3">
+              <div class="field">
+                <label for="track-year">Year</label>
+                <input class="input" id="track-year" type="number" placeholder="1935" min="1900" max="1980">
+              </div>
+              <div class="field">
+                <label for="track-duration">Duration (sec) *</label>
+                <input class="input" id="track-duration" type="number" placeholder="180" min="1" required>
+              </div>
+              <div class="field">
+                <label for="track-slot">Mood</label>
+                <select class="input" id="track-slot">
+                  <option value="all">All moods</option>
+                  <option value="energetic">Energetic (morning)</option>
+                  <option value="calm">Calm (evening)</option>
+                  <option value="jazz">Jazz (evening)</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="track-category">Category</label>
+              <select class="input" id="track-category"></select>
+            </div>
+            <div class="field">
+              <label for="track-filename">Filename * <span class="text-muted">(e.g. summertime.mp3)</span></label>
+              <input class="input" id="track-filename" type="text" placeholder="summertime.mp3" required>
+            </div>
+            <div style="display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap">
+              <button class="btn btn-primary" type="submit" id="track-submit-btn">Add track</button>
+              <button class="btn btn-outline" type="button" id="track-cancel-btn" hidden>Cancel edit</button>
+            </div>
+          </form>
+          </details>
+
+          <div class="item-list" id="tracks-list"></div>
         </div>
-
-        <details style="margin-bottom:var(--sp-6)">
-          <summary style="cursor:pointer;font-size:var(--fs-sm);color:var(--clr-text-muted);font-weight:var(--fw-semibold)">Manual entry</summary>
-        <form class="add-form" id="track-form" aria-label="Add a track" style="margin-top:var(--sp-3)">
-          <div class="form-row">
-            <div class="field">
-              <label for="track-title">Title *</label>
-              <input class="input" id="track-title" type="text" placeholder="Summertime" required>
-            </div>
-            <div class="field">
-              <label for="track-artist">Artist *</label>
-              <input class="input" id="track-artist" type="text" placeholder="Billie Holiday" required>
-            </div>
-          </div>
-          <div class="form-row-3">
-            <div class="field">
-              <label for="track-year">Year</label>
-              <input class="input" id="track-year" type="number" placeholder="1935" min="1900" max="1980">
-            </div>
-            <div class="field">
-              <label for="track-duration">Duration (sec) *</label>
-              <input class="input" id="track-duration" type="number" placeholder="180" min="1" required>
-            </div>
-            <div class="field">
-              <label for="track-slot">Mood</label>
-              <select class="input" id="track-slot">
-                <option value="all">All moods</option>
-                <option value="energetic">Energetic (morning)</option>
-                <option value="calm">Calm (evening)</option>
-                <option value="jazz">Jazz (evening)</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label for="track-filename">Filename * <span class="text-muted">(e.g. summertime.mp3)</span></label>
-            <input class="input" id="track-filename" type="text" placeholder="summertime.mp3" required>
-          </div>
-          <div>
-            <button class="btn btn-primary" type="submit">Add track</button>
-          </div>
-        </form>
-        </details>
-
-        <div class="item-list" id="tracks-list"></div>
       </section>
 
       <!-- ── Anecdotes ───────────────────────────────────────── -->
       <section class="admin-section" aria-labelledby="anecdotes-title">
         <div class="section-header">
-          <h2 id="anecdotes-title" class="section-title">Anecdotes</h2>
-          <span class="text-muted text-sm" id="anecdotes-count"></span>
+          <div class="section-header-main">
+            <h2 id="anecdotes-title" class="section-title">Anecdotes</h2>
+            <span class="text-muted text-sm" id="anecdotes-count"></span>
+          </div>
+          <button class="section-toggle" type="button" aria-expanded="true" aria-controls="anecdotes-section-body" aria-label="Collapse Anecdotes section">
+            <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"></path>
+            </svg>
+          </button>
         </div>
 
-        <form class="add-form" id="anecdote-form" aria-label="Add an anecdote">
-          <div class="field">
-            <label for="anecdote-title-input">Title *</label>
-            <input class="input" id="anecdote-title-input" type="text"
-                   placeholder="The birth of Jazz" required>
-          </div>
-          <div class="field">
-            <label for="anecdote-content">Content *</label>
-            <textarea class="input" id="anecdote-content" rows="3"
-                      placeholder="In the early 20th century…" required
-                      style="resize:vertical; height:auto"></textarea>
-          </div>
-          <div class="form-row">
+        <div class="section-body" id="anecdotes-section-body">
+          <form class="add-form" id="anecdote-form" aria-label="Add an anecdote">
             <div class="field">
-              <label for="anecdote-artist">Artist <span class="text-muted">(optional)</span></label>
-              <input class="input" id="anecdote-artist" type="text" placeholder="Billie Holiday">
+              <label for="anecdote-title-input">Title *</label>
+              <input class="input" id="anecdote-title-input" type="text"
+                     placeholder="The birth of Jazz" required>
             </div>
             <div class="field">
-              <label for="anecdote-year">Year <span class="text-muted">(optional)</span></label>
-              <input class="input" id="anecdote-year" type="number" placeholder="1939" min="1900" max="1980">
+              <label for="anecdote-content">Content *</label>
+              <textarea class="input" id="anecdote-content" rows="3"
+                        placeholder="In the early 20th century…" required
+                        style="resize:vertical; height:auto"></textarea>
             </div>
-          </div>
-          <div>
-            <button class="btn btn-primary" type="submit">Add anecdote</button>
-          </div>
-        </form>
+            <div class="form-row">
+              <div class="field">
+                <label for="anecdote-artist">Artist <span class="text-muted">(optional)</span></label>
+                <input class="input" id="anecdote-artist" type="text" placeholder="Billie Holiday">
+              </div>
+              <div class="field">
+                <label for="anecdote-year">Year <span class="text-muted">(optional)</span></label>
+                <input class="input" id="anecdote-year" type="number" placeholder="1939" min="1900" max="1980">
+              </div>
+            </div>
+            <div class="field">
+              <label for="anecdote-category">Music category <span class="text-muted">(optional)</span></label>
+              <select class="input" id="anecdote-category"></select>
+            </div>
+            <div style="display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap">
+              <button class="btn btn-primary" type="submit" id="anecdote-submit-btn">Add anecdote</button>
+              <button class="btn btn-outline" type="button" id="anecdote-cancel-btn" hidden>Cancel edit</button>
+            </div>
+          </form>
 
-        <div class="item-list" id="anecdotes-list"></div>
+          <div class="item-list" id="anecdotes-list"></div>
+        </div>
+      </section>
+
+      <!-- ── Schedule sessions ─────────────────────────────── -->
+      <section class="admin-section" aria-labelledby="sessions-title">
+        <div class="section-header">
+          <div class="section-header-main">
+            <h2 id="sessions-title" class="section-title">Schedule Sessions</h2>
+            <span class="text-muted text-sm" id="sessions-count"></span>
+          </div>
+          <button class="section-toggle" type="button" aria-expanded="true" aria-controls="sessions-section-body" aria-label="Collapse Schedule Sessions section">
+            <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="section-body" id="sessions-section-body">
+          <p class="text-muted text-sm" style="margin-bottom:var(--sp-4)">Create time windows that play random tracks from a single music category.</p>
+
+          <form class="add-form" id="session-form" aria-label="Add or edit a schedule session" style="max-width:640px">
+            <div class="form-row">
+              <div class="field">
+                <label for="session-name">Session name *</label>
+                <input class="input" id="session-name" type="text" placeholder="Morning Jazz Session" required>
+              </div>
+              <div class="field">
+                <label for="session-category">Music category *</label>
+                <select class="input" id="session-category"></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="session-start-time">Start time *</label>
+                <input class="input" id="session-start-time" type="time" required>
+              </div>
+              <div class="field">
+                <label for="session-end-time">End time *</label>
+                <input class="input" id="session-end-time" type="time" required>
+              </div>
+            </div>
+            <div style="display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-sm);font-weight:var(--fw-semibold);color:var(--clr-text-muted)">
+                <input id="session-enabled" type="checkbox" checked>
+                Session enabled
+              </label>
+              <button class="btn btn-primary" type="submit" id="session-submit-btn">Add session</button>
+              <button class="btn btn-outline" type="button" id="session-cancel-btn" hidden>Cancel edit</button>
+            </div>
+          </form>
+
+          <div class="item-list" id="sessions-list"></div>
+        </div>
       </section>
 
       <!-- ── Censor words ────────────────────────────────────── -->
       <section class="admin-section" aria-labelledby="censor-title">
         <div class="section-header">
-          <h2 id="censor-title" class="section-title">Censor words</h2>
-          <span class="text-muted text-sm" id="censor-count"></span>
+          <div class="section-header-main">
+            <h2 id="censor-title" class="section-title">Censor words</h2>
+            <span class="text-muted text-sm" id="censor-count"></span>
+          </div>
+          <button class="section-toggle" type="button" aria-expanded="true" aria-controls="censor-section-body" aria-label="Collapse Censor words section">
+            <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"></path>
+            </svg>
+          </button>
         </div>
 
-        <form class="add-form" id="censor-form" aria-label="Add a banned word" style="max-width:400px">
-          <div class="form-row">
-            <div class="field">
-              <label for="censor-word">Word *</label>
-              <input class="input" id="censor-word" type="text" placeholder="badword" required>
+        <div class="section-body" id="censor-section-body">
+          <form class="add-form" id="censor-form" aria-label="Add a banned word" style="max-width:400px">
+            <div class="form-row">
+              <div class="field">
+                <label for="censor-word">Word *</label>
+                <input class="input" id="censor-word" type="text" placeholder="badword" required>
+              </div>
+              <div class="field" style="display:flex;align-items:flex-end">
+                <button class="btn btn-primary" type="submit" style="width:100%">Add word</button>
+              </div>
             </div>
-            <div class="field" style="display:flex;align-items:flex-end">
-              <button class="btn btn-primary" type="submit" style="width:100%">Add word</button>
-            </div>
-          </div>
-        </form>
+          </form>
 
-        <div class="item-list" id="censor-list"></div>
+          <div class="item-list" id="censor-list"></div>
+        </div>
       </section>
 
     </div>
@@ -372,428 +647,6 @@
   <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    // ── Auth ────────────────────────────────────────────────
-    let AUTH_TOKEN = sessionStorage.getItem('admin_token') || '';
-
-    async function checkAuth(token) {
-      const res = await fetch('/api/admin/tracks', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      return res.ok;
-    }
-
-    async function init() {
-      if (AUTH_TOKEN && await checkAuth(AUTH_TOKEN)) {
-        showPanel();
-      }
-    }
-
-    document.getElementById('auth-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const pwd = document.getElementById('password-input').value;
-      if (await checkAuth(pwd)) {
-        AUTH_TOKEN = pwd;
-        sessionStorage.setItem('admin_token', pwd);
-        showPanel();
-      } else {
-        document.getElementById('auth-error').textContent = 'Incorrect password.';
-      }
-    });
-
-    function showPanel() {
-      document.getElementById('auth-gate').style.display  = 'none';
-      document.getElementById('admin-panel').style.display = '';
-      document.getElementById('skip-link').setAttribute('href', '#admin-panel');
-      loadAll();
-    }
-
-    // ── Toast ───────────────────────────────────────────────
-    const toast = document.getElementById('toast');
-    let toastTimer;
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    // ── API helpers ─────────────────────────────────────────
-    function authHeaders() {
-      return { 'Content-Type': 'application/json', Authorization: `Bearer ${AUTH_TOKEN}` };
-    }
-
-    async function apiFetch(url, opts = {}) {
-      const res = await fetch(url, { ...opts, headers: authHeaders() });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Error ${res.status}`);
-      }
-      return res.json();
-    }
-
-    // ── Tracks ──────────────────────────────────────────────
-    async function loadTracks() {
-      const tracks = await apiFetch('/api/admin/tracks');
-      document.getElementById('tracks-count').textContent = `${tracks.length} track${tracks.length !== 1 ? 's' : ''}`;
-      const list = document.getElementById('tracks-list');
-      if (!tracks.length) {
-        list.innerHTML = '<p class="empty-state">No tracks yet.</p>';
-        return;
-      }
-      list.innerHTML = tracks.map(t => `
-        <div class="item-row">
-          <div class="item-info">
-            <div class="item-title">${esc(t.title)}</div>
-            <div class="item-meta">${esc(t.artist)} · ${t.year || '—'} · ${t.duration}s · ${t.time_slot} · ${esc(t.filename)}</div>
-          </div>
-          <button class="btn-delete" data-id="${t.id}" data-type="track" aria-label="Delete ${esc(t.title)}">Delete</button>
-        </div>`).join('');
-    }
-
-    document.getElementById('track-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        await apiFetch('/api/admin/tracks', {
-          method: 'POST',
-          body: JSON.stringify({
-            title:     document.getElementById('track-title').value.trim(),
-            artist:    document.getElementById('track-artist').value.trim(),
-            year:      document.getElementById('track-year').value || null,
-            duration:  document.getElementById('track-duration').value,
-            filename:  document.getElementById('track-filename').value.trim(),
-            time_slot: document.getElementById('track-slot').value,
-          })
-        });
-        e.target.reset();
-        showToast('Track added.');
-        loadTracks();
-      } catch (err) { showToast(err.message); }
-    });
-
-    // ── Anecdotes ───────────────────────────────────────────
-    async function loadAnecdotes() {
-      const items = await apiFetch('/api/admin/anecdotes');
-      document.getElementById('anecdotes-count').textContent = `${items.length} anecdote${items.length !== 1 ? 's' : ''}`;
-      const list = document.getElementById('anecdotes-list');
-      if (!items.length) {
-        list.innerHTML = '<p class="empty-state">No anecdotes yet.</p>';
-        return;
-      }
-      list.innerHTML = items.map(a => `
-        <div class="item-row">
-          <div class="item-info">
-            <div class="item-title">${esc(a.title)}</div>
-            <div class="item-meta">${esc(a.content.slice(0, 80))}${a.content.length > 80 ? '…' : ''}</div>
-          </div>
-          <button class="btn-delete" data-id="${a.id}" data-type="anecdote" aria-label="Delete ${esc(a.title)}">Delete</button>
-        </div>`).join('');
-    }
-
-    document.getElementById('anecdote-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        await apiFetch('/api/admin/anecdotes', {
-          method: 'POST',
-          body: JSON.stringify({
-            title:   document.getElementById('anecdote-title-input').value.trim(),
-            content: document.getElementById('anecdote-content').value.trim(),
-            artist:  document.getElementById('anecdote-artist').value.trim() || null,
-            year:    document.getElementById('anecdote-year').value || null,
-          })
-        });
-        e.target.reset();
-        showToast('Anecdote added.');
-        loadAnecdotes();
-      } catch (err) { showToast(err.message); }
-    });
-
-    // ── Censor words ────────────────────────────────────────
-    async function loadCensor() {
-      const items = await apiFetch('/api/admin/censor');
-      document.getElementById('censor-count').textContent = `${items.length} word${items.length !== 1 ? 's' : ''}`;
-      const list = document.getElementById('censor-list');
-      if (!items.length) {
-        list.innerHTML = '<p class="empty-state">No banned words.</p>';
-        return;
-      }
-      list.innerHTML = items.map(w => `
-        <div class="item-row">
-          <div class="item-info">
-            <div class="item-title">${esc(w.word)}</div>
-          </div>
-          <button class="btn-delete" data-id="${w.id}" data-type="censor" aria-label="Remove ${esc(w.word)}">Remove</button>
-        </div>`).join('');
-    }
-
-    document.getElementById('censor-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        await apiFetch('/api/admin/censor', {
-          method: 'POST',
-          body: JSON.stringify({ word: document.getElementById('censor-word').value.trim() })
-        });
-        e.target.reset();
-        showToast('Word added.');
-        loadCensor();
-      } catch (err) { showToast(err.message); }
-    });
-
-    // ── Delete (event delegation) ───────────────────────────
-    document.addEventListener('click', async (e) => {
-      const btn = e.target.closest('.btn-delete');
-      if (!btn) return;
-      const { id, type } = btn.dataset;
-      const urlMap = { track: 'tracks', anecdote: 'anecdotes', censor: 'censor' };
-      const reloadMap = { track: loadTracks, anecdote: loadAnecdotes, censor: loadCensor };
-      try {
-        await apiFetch(`/api/admin/${urlMap[type]}/${id}`, { method: 'DELETE' });
-        showToast('Deleted.');
-        reloadMap[type]();
-      } catch (err) { showToast(err.message); }
-    });
-
-    // ── Upload ──────────────────────────────────────────────
-    const uploadZone    = document.getElementById('upload-zone');
-    const uploadInput   = document.getElementById('upload-input');
-    const btnUpload     = document.getElementById('btn-upload');
-    const uploadFileList = document.getElementById('upload-file-list');
-    const uploadProgress = document.getElementById('upload-progress');
-    const uploadResults  = document.getElementById('upload-results');
-
-    let selectedFiles = [];
-
-    uploadZone.addEventListener('click', () => uploadInput.click());
-    uploadZone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') uploadInput.click(); });
-
-    uploadZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadZone.style.borderColor = 'var(--clr-copper)';
-    });
-    uploadZone.addEventListener('dragleave', () => {
-      uploadZone.style.borderColor = 'var(--clr-border)';
-    });
-    uploadZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadZone.style.borderColor = 'var(--clr-border)';
-      const files = Array.from(e.dataTransfer.files).filter(f => f.name.toLowerCase().endsWith('.mp3'));
-      if (files.length) setUploadFiles(files);
-    });
-
-    uploadInput.addEventListener('change', () => {
-      if (uploadInput.files.length) setUploadFiles(Array.from(uploadInput.files));
-    });
-
-    function setUploadFiles(files) {
-      selectedFiles = files;
-      uploadFileList.innerHTML = files.map(f =>
-        `<div class="text-sm" style="color:var(--clr-text)">${esc(f.name)} <span class="text-muted">(${(f.size / 1024 / 1024).toFixed(1)} MB)</span></div>`
-      ).join('');
-      btnUpload.style.display = '';
-      uploadResults.innerHTML = '';
-    }
-
-    btnUpload.addEventListener('click', () => {
-      if (!selectedFiles.length) return;
-      const formData = new FormData();
-      selectedFiles.forEach(f => formData.append('files', f));
-
-      btnUpload.disabled = true;
-      btnUpload.textContent = 'Upload en cours...';
-      uploadProgress.innerHTML = '<div style="height:4px;background:var(--clr-border);border-radius:2px;overflow:hidden"><div id="upload-bar" style="height:100%;width:0%;background:var(--clr-copper);transition:width 0.3s"></div></div>';
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/api/admin/upload');
-      xhr.setRequestHeader('Authorization', `Bearer ${AUTH_TOKEN}`);
-
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-          const bar = document.getElementById('upload-bar');
-          if (bar) bar.style.width = Math.round((e.loaded / e.total) * 100) + '%';
-        }
-      });
-
-      xhr.addEventListener('load', () => {
-        btnUpload.disabled = false;
-        btnUpload.textContent = 'Upload';
-        btnUpload.style.display = 'none';
-        uploadFileList.innerHTML = '';
-        uploadProgress.innerHTML = '';
-        selectedFiles = [];
-        uploadInput.value = '';
-
-        if (xhr.status === 200) {
-          const data = JSON.parse(xhr.responseText);
-          uploadResults.innerHTML = data.results.map(r =>
-            r.success
-              ? `<div class="text-sm" style="color:#27ae60">${esc(r.title)} — ${esc(r.artist)} (${r.duration}s)</div>`
-              : `<div class="text-sm" style="color:#c0392b">${esc(r.originalName)}: ${esc(r.error)}</div>`
-          ).join('');
-          const ok = data.results.filter(r => r.success).length;
-          showToast(`${ok} file(s) uploaded.`);
-          loadTracks();
-          loadAll();
-        } else {
-          const err = JSON.parse(xhr.responseText || '{}');
-          showToast(err.error || 'Upload failed.');
-        }
-      });
-
-      xhr.addEventListener('error', () => {
-        btnUpload.disabled = false;
-        btnUpload.textContent = 'Upload';
-        uploadProgress.innerHTML = '';
-        showToast('Network error.');
-      });
-
-      xhr.send(formData);
-    });
-
-    // ── Now Playing & Queue ────────────────────────────────
-    const socket = io();
-    let npInterval = null;
-    let npStartedAt = 0;
-    let npDuration  = 0;
-
-    function fmtTime(s) {
-      const m = Math.floor(s / 60);
-      return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
-    }
-
-    function renderNowPlaying(track, position) {
-      const titleEl    = document.getElementById('np-title');
-      const metaEl     = document.getElementById('np-meta');
-      const timeEl     = document.getElementById('np-time');
-      const durEl      = document.getElementById('np-duration');
-      const progressEl = document.getElementById('np-progress');
-
-      if (!track) {
-        titleEl.textContent    = 'No track';
-        metaEl.textContent     = 'The library is empty';
-        timeEl.textContent     = '0:00';
-        durEl.textContent      = '0:00';
-        progressEl.style.width = '0%';
-        npDuration = 0;
-        if (npInterval) { clearInterval(npInterval); npInterval = null; }
-        return;
-      }
-
-      titleEl.textContent = track.title;
-      metaEl.textContent  = `${track.artist} · ${track.year || '—'} · ${track.duration}s · ${track.filename}`;
-      npDuration  = track.duration;
-      npStartedAt = Date.now() - (position * 1000);
-
-      if (npInterval) clearInterval(npInterval);
-      npInterval = setInterval(() => {
-        const pos = Math.min(Math.floor((Date.now() - npStartedAt) / 1000), npDuration);
-        timeEl.textContent     = fmtTime(pos);
-        durEl.textContent      = fmtTime(npDuration);
-        progressEl.style.width = npDuration > 0 ? ((pos / npDuration) * 100) + '%' : '0%';
-      }, 1000);
-    }
-
-    function renderQueue(queue) {
-      const list = document.getElementById('queue-list');
-      if (!queue || !queue.length) {
-        list.innerHTML = '<p class="empty-state">Queue is empty — the auto-DJ picks tracks automatically.</p>';
-        return;
-      }
-      list.innerHTML = queue.map((t, i) => `
-        <div class="item-row">
-          <div class="item-info">
-            <div class="item-title">${esc(t.title)}</div>
-            <div class="item-meta">${esc(t.artist)} · ${t.duration}s</div>
-          </div>
-          <button class="btn-delete" data-queue-index="${i}" aria-label="Remove ${esc(t.title)}">Remove</button>
-        </div>`).join('');
-    }
-
-    function populateQueueSelect(tracks) {
-      const sel = document.getElementById('queue-track-select');
-      const current = sel.value;
-      sel.innerHTML = '<option value="">— Select a track —</option>' +
-        tracks.map(t => `<option value="${t.id}">${esc(t.title)} — ${esc(t.artist)}</option>`).join('');
-      sel.value = current;
-    }
-
-    async function loadQueue() {
-      try {
-        const data = await apiFetch('/api/admin/queue');
-        renderNowPlaying(data.currentTrack, 0);
-        renderQueue(data.queue);
-      } catch { /* ignore on first load if server not ready */ }
-    }
-
-    async function loadNowPlaying() {
-      try {
-        const res = await fetch('/api/radio/now-playing');
-        if (res.ok) {
-          const data = await res.json();
-          renderNowPlaying(data.track, data.position);
-        }
-      } catch { /* ignore */ }
-    }
-
-    socket.on('track_change', (data) => {
-      renderNowPlaying(data.track, data.position);
-    });
-
-    socket.on('queue_update', (data) => {
-      renderNowPlaying(data.currentTrack, 0);
-      renderQueue(data.queue);
-    });
-
-    document.getElementById('btn-skip').addEventListener('click', async () => {
-      try {
-        await apiFetch('/api/admin/queue/skip', { method: 'POST', body: '{}' });
-        showToast('Skipped to next track.');
-      } catch (err) { showToast(err.message); }
-    });
-
-    document.getElementById('queue-add-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const trackId = Number(document.getElementById('queue-track-select').value);
-      if (!trackId) return showToast('Please select a track.');
-      try {
-        await apiFetch('/api/admin/queue', {
-          method: 'POST',
-          body: JSON.stringify({ trackId })
-        });
-        showToast('Added to queue.');
-      } catch (err) { showToast(err.message); }
-    });
-
-    document.addEventListener('click', async (e) => {
-      const btn = e.target.closest('[data-queue-index]');
-      if (!btn) return;
-      const index = Number(btn.dataset.queueIndex);
-      try {
-        await apiFetch(`/api/admin/queue/${index}`, { method: 'DELETE' });
-        showToast('Removed from queue.');
-      } catch (err) { showToast(err.message); }
-    });
-
-    // ── Load all ────────────────────────────────────────────
-    async function loadAll() {
-      const tracks = await apiFetch('/api/admin/tracks').catch(() => []);
-      populateQueueSelect(Array.isArray(tracks) ? tracks : []);
-      loadTracks();
-      loadAnecdotes();
-      loadCensor();
-      loadNowPlaying();
-      loadQueue();
-    }
-
-    // XSS-safe escaping for innerHTML
-    function esc(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    init();
-  </script>
+  <script src="/js/admin.js"></script>
 </body>
 </html>

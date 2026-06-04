@@ -49,9 +49,9 @@ backend/
   server.js              # Express + Socket.io entry point
   db.js                  # Shared SQLite connection
   routes/
-    radio.js             # GET /api/radio/now-playing, /api/radio/anecdotes
+    radio.js             # GET /api/radio/now-playing, /api/radio/status, /api/radio/anecdotes
     chat.js              # GET /api/chat/messages
-    admin.js             # CRUD for tracks, anecdotes, censor words
+    admin.js             # CRUD for tracks, categories, anecdotes, censor words + radio settings
   middleware/
     authMiddleware.js    # Bearer token check + rate limiting
     censorMiddleware.js  # Chat censorship
@@ -80,6 +80,7 @@ database/
 
 Navigate to `/admin` and enter the `ADMIN_PASSWORD` from your `.env`.  
 Lets you manage tracks, anecdotes, and chat censor words.
+It also controls radio playback, operating hours, and track categories.
 
 ## Security notes
 
@@ -92,4 +93,4 @@ Lets you manage tracks, anecdotes, and chat censor words.
   ```
 - Set `CORS_ORIGIN` to your actual frontend domain in production (never leave `*` in production).
 - Serve the application behind HTTPS in production — the admin password travels as a Bearer token in HTTP headers.
-- The `/login` page and `backend/routes/auth.js` are placeholders reserved for Phase 2 user accounts.
+- `backend/routes/auth.js` is a placeholder reserved for Phase 2 user accounts.

@@ -1,7 +1,11 @@
 // frontend/js/radio-player.js
 
 // ── DOM refs ────────────────────────────────────────────────
-const audio         = document.getElementById('audio');
+function getRadioAudio() {
+  return document.getElementById('audio') || document.querySelector('audio');
+}
+
+const radioAudio    = getRadioAudio();
 const btnPlay       = document.getElementById('btn-play');
 const iconPlay      = document.getElementById('icon-play');
 const iconPause     = document.getElementById('icon-pause');
@@ -13,6 +17,12 @@ const progressBar   = document.getElementById('progress-bar');
 const timeCurrent   = document.getElementById('time-current');
 const timeTotal     = document.getElementById('time-total');
 const listenerCount = document.getElementById('listener-count');
+const radioStatus   = document.getElementById('radio-status');
+const volumeDrawer  = document.getElementById('volume-control');
+const volumeToggle  = document.getElementById('volume-toggle');
+const volumePanel   = document.getElementById('volume-panel');
+const volumeSlider  = document.getElementById('volume-slider');
+const volumeValue   = document.getElementById('volume-value');
 const anecdoteTitle   = document.getElementById('anecdote-title');
 const anecdoteContent = document.getElementById('anecdote-content');
 const anecdoteMeta    = document.getElementById('anecdote-meta');
@@ -24,6 +34,8 @@ let isPlaying     = false;
 let toastTimer    = null;
 let pollTimer     = null;
 let anecdoteTimer = null;
+let radioState    = { status: 'stopped', message: 'Radio stopped.' };
+const defaultVolume = 0.5;
 
 // ── Utilities ────────────────────────────────────────────────
 function formatTime(seconds) {
@@ -39,14 +51,82 @@ function showToast(message, duration = 3000) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
 }
 
+function clampVolume(value) {
+  return Math.min(1, Math.max(0, value));
+}
+
+function updateVolumeDisplay(volume) {
+  if (!volumeSlider || !volumeValue) return;
+  const percentage = Math.round(clampVolume(volume) * 100);
+  volumeValue.textContent = `${percentage}%`;
+  volumeSlider.value = String(percentage);
+  volumeSlider.setAttribute('aria-valuetext', `${percentage}%`);
+}
+
+function setAudioVolume(volume) {
+  if (!radioAudio) return;
+  radioAudio.volume = clampVolume(volume);
+  updateVolumeDisplay(radioAudio.volume);
+}
+
+function setVolumeDrawerOpen(isOpen) {
+  if (!volumeDrawer || !volumeToggle || !volumePanel) return;
+  volumeDrawer.classList.toggle('is-open', isOpen);
+  volumeToggle.setAttribute('aria-expanded', String(isOpen));
+  volumeToggle.setAttribute('aria-label', isOpen ? 'Close volume control' : 'Open volume control');
+  volumePanel.setAttribute('aria-hidden', String(!isOpen));
+}
+
+function setRadioState(state) {
+  radioState = { ...radioState, ...state };
+  if (radioStatus) {
+    if (radioState.status === 'active') {
+      radioStatus.textContent = 'Radio active';
+    } else if (radioState.status === 'outside_schedule') {
+      radioStatus.textContent = 'Outside schedule';
+    } else if (radioState.status === 'invalid_schedule') {
+      radioStatus.textContent = 'Invalid schedule';
+    } else {
+      radioStatus.textContent = 'Radio stopped';
+    }
+  }
+}
+
+function stopPlayback(message) {
+  if (radioAudio) {
+    radioAudio.pause();
+    radioAudio.removeAttribute('src');
+    radioAudio.load();
+  }
+  currentTrack = null;
+  timeCurrent.textContent = '0:00';
+  timeTotal.textContent = '0:00';
+  progressFill.style.width = '0%';
+  progressBar.setAttribute('aria-valuenow', '0');
+  setPlayState(false);
+  if (message) showToast(message);
+}
+
 // ── Radio player ─────────────────────────────────────────────
 async function fetchNowPlaying() {
   try {
     const res  = await fetch('/api/radio/now-playing');
-    if (!res.ok) throw new Error('No track available');
     const data = await res.json();
 
+    setRadioState({
+      status: data.state,
+      message: data.message,
+      enabled: data.radioEnabled,
+    });
     listenerCount.textContent = data.listeners;
+
+    if (!data.track) {
+      stopPlayback(data.message || 'No track available.');
+      trackTitle.textContent = data.state === 'stopped' ? 'Radio stopped' : 'No track available';
+      trackArtist.textContent = '';
+      trackYear.textContent = '';
+      return;
+    }
 
     // Only reload audio if track changed
     if (!currentTrack || currentTrack.id !== data.track.id) {
@@ -54,8 +134,8 @@ async function fetchNowPlaying() {
       renderTrack(data.track, data.position);
     } else {
       // Same track — just sync position if drift > 3s
-      const drift = Math.abs(audio.currentTime - data.position);
-      if (drift > 3) audio.currentTime = data.position;
+      const drift = Math.abs(radioAudio.currentTime - data.position);
+      if (drift > 3) radioAudio.currentTime = data.position;
     }
   } catch (err) {
     trackTitle.textContent  = 'No track available';
@@ -68,20 +148,22 @@ function renderTrack(track, position) {
   trackTitle.textContent  = track.title;
   trackArtist.textContent = track.artist;
   trackYear.textContent   = track.year || '';
+  setRadioState(radioState);
 
   timeTotal.textContent = formatTime(track.duration);
   progressBar.setAttribute('aria-valuemax', track.duration);
 
   // Set audio source — files served from /audio/
-  audio.src         = `/audio/${track.filename}`;
-  audio.currentTime = position;
+  if (!radioAudio) return;
+  radioAudio.src         = `/audio/${track.filename}`;
+  radioAudio.currentTime = position;
 
-  if (isPlaying) audio.play().catch(() => {});
+  if (isPlaying) radioAudio.play().catch(() => {});
 }
 
 function updateProgress() {
-  if (!currentTrack || !audio.duration) return;
-  const pos     = audio.currentTime;
+  if (!currentTrack || !radioAudio || !radioAudio.duration) return;
+  const pos     = radioAudio.currentTime;
   const dur     = currentTrack.duration;
   const pct     = Math.min((pos / dur) * 100, 100);
 
@@ -98,23 +180,53 @@ function setPlayState(playing) {
   iconPause.style.display = playing ? ''     : 'none';
 }
 
+function handleVolumeInput() {
+  if (!radioAudio || !volumeSlider) return;
+  const sliderVolume = Number(volumeSlider.value) / 100;
+  setAudioVolume(sliderVolume);
+}
+
+if (radioAudio) {
+  setAudioVolume(defaultVolume);
+} else if (volumeValue) {
+  volumeValue.textContent = '—';
+}
+
 btnPlay.addEventListener('click', () => {
-  if (!currentTrack) return;
+  if (!radioAudio || !currentTrack) {
+    showToast(radioState.message || 'Radio is stopped.');
+    return;
+  }
 
   if (isPlaying) {
-    audio.pause();
+    radioAudio.pause();
     setPlayState(false);
   } else {
-    audio.play().catch(() => showToast('Unable to play audio. File may be missing.'));
+    radioAudio.play().catch(() => showToast('Unable to play audio. File may be missing.'));
     setPlayState(true);
   }
 });
 
-audio.addEventListener('timeupdate', updateProgress);
-audio.addEventListener('ended', fetchNowPlaying);
-audio.addEventListener('error', () => {
-  if (currentTrack) showToast(`Audio file not found: ${currentTrack.filename}`);
-});
+if (radioAudio) {
+  radioAudio.addEventListener('timeupdate', updateProgress);
+  radioAudio.addEventListener('ended', fetchNowPlaying);
+  radioAudio.addEventListener('error', () => {
+    if (currentTrack) showToast(`Audio file not found: ${currentTrack.filename}`);
+  });
+}
+
+if (volumeSlider) {
+  volumeSlider.addEventListener('input', handleVolumeInput);
+}
+
+if (volumeToggle) {
+  volumeToggle.addEventListener('click', () => {
+    const isOpen = !volumeDrawer.classList.contains('is-open');
+    setVolumeDrawerOpen(isOpen);
+  });
+}
+
+setVolumeDrawerOpen(false);
 
 // ── Anecdotes ─────────────────────────────────────────────────
 async function fetchAnecdote() {
@@ -125,7 +237,7 @@ async function fetchAnecdote() {
 
     anecdoteTitle.textContent   = data.title;
     anecdoteContent.textContent = data.content;
-    anecdoteMeta.textContent    = [data.artist, data.year].filter(Boolean).join(' · ');
+    anecdoteMeta.textContent    = [data.category_name, data.artist, data.year].filter(Boolean).join(' · ');
   } catch {}
 }
 
@@ -238,6 +350,15 @@ socket.on('track_change', (data) => {
   if (data.track) {
     currentTrack = data.track;
     renderTrack(data.track, data.position || 0);
+  } else {
+    stopPlayback(radioState.message || 'Radio stopped.');
+  }
+});
+
+socket.on('radio_state', (state) => {
+  setRadioState(state);
+  if (!state.currentTrack) {
+    stopPlayback(state.message || 'Radio stopped.');
   }
 });
 
@@ -253,7 +374,9 @@ anecdoteTimer = setInterval(fetchAnecdote, 120_000);
 
 // Autoplay if redirected from homepage
 if (new URLSearchParams(location.search).get('autoplay') === '1') {
-  audio.addEventListener('canplay', () => {
-    audio.play().then(() => setPlayState(true)).catch(() => {});
-  }, { once: true });
+  if (radioAudio) {
+    radioAudio.addEventListener('canplay', () => {
+      radioAudio.play().then(() => setPlayState(true)).catch(() => {});
+    }, { once: true });
+  }
 }
